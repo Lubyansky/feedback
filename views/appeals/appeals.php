@@ -3,6 +3,7 @@
 use yii\bootstrap4\ActiveForm;
 use yii\bootstrap4\Html;
 use yii\helpers\Url;
+use yii\widgets\LinkPager;
 
 $this->title = 'Обращения';
 $this->params['breadcrumbs'][] = $this->title;
@@ -21,5 +22,8 @@ $this->params['breadcrumbs'][] = $this->title;
             <span><?= Html::encode($appeal['date']) ?> <?= Html::encode($appeal['time']) ?></span>
         </div>
     <?php endforeach; ?>
+    <div class="pagination">
+        <?echo LinkPager::widget(['pagination' => $pages]) ?>
+    </div>
 
 </div>

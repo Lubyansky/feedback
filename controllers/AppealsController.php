@@ -4,10 +4,11 @@ namespace app\modules\controllers;
 
 use Yii;
 use yii\web\Controller;
+use yii\web\UploadedFile;
+use yii\data\Pagination;
+use yii\helpers\FileHelper;
 use app\modules\models\AppealForm;
 use app\modules\models\Appeal;
-use yii\web\UploadedFile;
-use yii\helpers\FileHelper;
 
 class AppealsController extends Controller
 {
@@ -63,10 +64,16 @@ class AppealsController extends Controller
 
     public function actionAppeals()
     {
-        $appeals = Appeal::find()->all();
+        $appeals = Appeal::find();
+        $pages = new Pagination([
+            'defaultPageSize' => 10,
+            'totalCount' => $appeals->count()
+        ]);
+        $appeals = $appeals->offset($pages->offset)->limit($pages->limit)->all();
 
         return $this->render('appeals', [
-            'appeals' => $appeals
+            'appeals' => $appeals,
+            'pages' => $pages
         ]);
     }
 

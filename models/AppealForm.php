@@ -4,9 +4,6 @@ namespace app\modules\models;
 
 use Yii;
 use yii\base\Model;
-use app\modules\models\Appeal;
-
-$model = new Appeal;
 
 class AppealForm extends Model
 {
@@ -19,25 +16,32 @@ class AppealForm extends Model
     public $file;
     public $verifyCode;
 
-     /**
-     * @return array the validation rules.
-     */
     public function rules()
     {
         return [
-            // name, email, subject and body are required
-            [['surname', 'name', 'patronymic', 'phoneNumber', 'email', 'text'], 'required'],
-            // email has to be a valid email address
+            [['surname', 'name', 'patronymic', 'phoneNumber', 'email', 'text', 'verifyCode'], 'required'],
             ['email', 'email'],
-            ['phoneNumber', 'number']
+            ['phoneNumber', 'number'],
+            [['file'], 'file', 'skipOnEmpty' => true, 'extensions' => 'doc, pdf, zip', 'maxSize' => 1024*1024, 'maxFiles' => 1],
+            ['verifyCode', 'captcha', 'captchaAction' => '/feedback/appeals/captcha']
         ];
     }
 
-    /**
-     * Sends an email to the specified email address using the information collected by this model.
-     * @param string $email the target email address
-     * @return bool whether the model passes validation
-     */
+    public function attributeLabels()
+    {
+        return [
+            'surname' => 'Фамилия',
+            'name' => 'Имя',
+            'patronymic' => 'Отчество',
+            'text' => 'Текст',
+            'file' => 'Приложение',
+            'phoneNumber' => 'Номер телефона',
+            'email' => 'Адрес электронной почты',
+            'verifyCode' => 'Проверочный код'
+        ];
+
+    }
+
     public function contact($email)
     {
         if ($this->validate()) {
@@ -50,19 +54,8 @@ class AppealForm extends Model
                 ->attach($this->file)
                 ->send();
 
-            array_push($model->setAppeals([
-                'id' => '1',
-                'surname' => $this->surname,
-                'name' => $this->name,
-                'patronymic' => $this->patronymic,
-                'phoneNumber' => $this->phoneNumber,
-                'email' => $this->email,
-                'text' => $this->text,
-                'file' => $this->file
-            ]));
             return true;
         }
         return false;
     }
-
 }

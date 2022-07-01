@@ -4,7 +4,7 @@ use yii\bootstrap4\ActiveForm;
 use yii\bootstrap4\Html;
 use yii\helpers\Url;
 
-$this->title = 'Appeal';
+$this->title = 'Обращение';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="site-login">
@@ -16,6 +16,9 @@ $this->params['breadcrumbs'][] = $this->title;
         <a href="tel:+<?= Html::encode($appeal['phoneNumber']) ?>">+<?= Html::encode($appeal['phoneNumber']) ?></a>
         <a href="mailto:<?= Html::encode($appeal['email']) ?>"><?= Html::encode($appeal['email']) ?></a>
         <p><?= Html::encode($appeal['text']) ?></p>
+        <?php if(array_key_exists('file', $appeal) && $appeal['file']): ?>
+            <a href="<?=Url::to(['appeals/download', 'id' => $appeal['id']])?>"><?= Html::encode($appeal['file']) ?></a>
+        <?php endif; ?>
     </div>
 
 </div>

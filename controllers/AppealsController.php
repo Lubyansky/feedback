@@ -4,16 +4,14 @@ namespace app\modules\controllers;
 
 use Yii;
 use yii\web\Controller;
-use yii\web\UploadedFile;
-use yii\data\Pagination;
-use yii\helpers\FileHelper;
+use yii\helpers\Url;
 use app\modules\models\AppealForm;
 use app\modules\models\Appeal;
+use app\modules\models\AppealSearch;
 
-class AppealsController extends Controller
-{
-    public function actions()
-    {
+class AppealsController extends Controller {
+
+    public function actions() {
         return [
             'error' => [
                 'class' => 'yii\web\ErrorAction',
@@ -25,36 +23,24 @@ class AppealsController extends Controller
         ];
     }
 
-    public function actionForm()
-    {
-        $model = new AppealForm();
+    public function actionForm() {
 
-        if ($model->load(Yii::$app->request->post())) {
+        $model = new AppealForm();
+        
+        if ($model->load(Yii::$app->request->post()) && $model->validate()){
+
             $appeal = new Appeal();
-            $appeal->surname = $model->surname;
-            $appeal->name = $model->name;
-            $appeal->patronymic = $model->patronymic;
-            $appeal->phoneNumber = $model->phoneNumber;
-            $appeal->email = $model->email;
-            $appeal->text = $model->text;
-            $appeal->date = date('Y-m-d');
-            $appeal->time = date('H:i:s');
+            $appeal->setAppeal($model);
+
             if($appeal->save()){
-                if($_FILES["AppealForm"]["name"]["file"]){
-                    $model->file = UploadedFile::getInstance($model, 'file');
-                    /*if($model->file->size > 1*8){
-                        throw new \Exception('File size over 1Mb');
-                    }*/
-                    $path = Yii::getAlias('@app/modules/uploads/' . $appeal->id . "/"); 
-                    FileHelper::createDirectory($path);
-                    $model->file->saveAs($path . $model->file->baseName . '.' . $model->file->extension);
-                }
-                //$model->contact(Yii::$app->params['adminEmail']);
+                $model->saveFile($appeal->id);
+                $model->contact('admin@mail.su', $appeal->id);
                 Yii::$app->session->setFlash('contactFormSubmitted');
             }
-            else{
+            else {
                 Yii::$app->session->setFlash('contactFormNotSubmitted');
             }
+
             return $this->refresh();
         }
         return $this->render('appeal-form', [
@@ -62,42 +48,35 @@ class AppealsController extends Controller
         ]);
     }
 
-    public function actionAppeals()
-    {
-        $appeals = Appeal::find();
-        $pages = new Pagination([
-            'defaultPageSize' => 10,
-            'totalCount' => $appeals->count()
-        ]);
-        $appeals = $appeals->offset($pages->offset)->limit($pages->limit)->all();
+    public function actionAppeals(){
+
+        $searchModel = new AppealSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        if ($searchModel->load(Yii::$app->request->post())) {
+            $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        }
 
         return $this->render('appeals', [
-            'appeals' => $appeals,
-            'pages' => $pages
+            'searchModel'  => $searchModel,
+            'dataProvider' => $dataProvider,
         ]);
     }
 
-    public function actionAppeal($id)
-    {
-        $appeal = Appeal::find()->asArray()->where('id=:id', [':id' => $id])->one();
-        $path = Yii::getAlias('@app/modules/uploads/' . $id . '/');
-        $appeal['file'] = '';
-        if(file_exists($path)){
-            $file = FileHelper::findFiles($path);
-            $appeal['file'] = basename($file[0]);
-        }
+    public function actionAppeal($id){
+
+        $appeal = (new Appeal())->getAppeal($id);
+
         return $this->render('appeal', [
             'appeal' => $appeal
         ]);
     }
 
     public function actionDownload($id) {
-        $path = Yii::getAlias('@app/modules/uploads/' . $id . '/');
-     
-        if (file_exists($path)) {
-            $file = FileHelper::findFiles($path);
-            return \Yii::$app->response->sendFile($file[0]);
-        } 
-        throw new \Exception('File not found');
-     }
+
+        $file = (new Appeal())->getFile($id);
+
+        return \Yii::$app->response->sendFile($file);
+    }
+
 }

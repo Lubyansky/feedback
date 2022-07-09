@@ -1,11 +1,9 @@
 <?
-/*
-use yii\widgets\ActiveForm;
-use yii\helpers\Html;
-*/
+
 use yii\bootstrap4\ActiveForm;
 use yii\bootstrap4\Html;
 use yii\captcha\Captcha;
+use yii\widgets\MaskedInput;
 
 $this->title = 'Обратная связь';
 $this->params['breadcrumbs'][] = $this->title;
@@ -30,9 +28,16 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 <?= $form->field($model, 'patronymic')->textInput(['value' => 'Иванович']) ?>
 
-                <?= $form->field($model, 'phoneNumber')->textInput(['value' => '79853698425']) ?>
+                <?= $form->field($model, 'phoneNumber')->widget(MaskedInput::className(), [
+                    'mask' => '+7 (999) 999-99-99',
+                    'clientOptions' => [                   
+                        'greedy' => false,
+                        'clearIncomplete' => false
+                    ]
+                    
+                ])->input(['value' => '79853698425']); ?>
 
-                <?= $form->field($model, 'email')->textInput(['value' => 'ivanovii@mail.ru']) ?>
+                <?= $form->field($model, 'email')->input('email', ['value' => 'abc@mail.ru']); ?>
 
                 <?= $form->field($model, 'text')->textArea(['rows' => 6, 'value' => 'Текст обращения']) ?>
 

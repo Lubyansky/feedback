@@ -9,6 +9,7 @@ use yii\helpers\Html;
 
 class Appeal extends ActiveRecord
 {
+    // В таблице используются поля id, surname, name, patronymic, phoneNumber, email, text, date, time
     public static function tableName() {
         return 'appeals';
     }

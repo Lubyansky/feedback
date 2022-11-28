@@ -7,7 +7,7 @@ use \yii\web\IdentityInterface;
 
 class User extends ActiveRecord implements IdentityInterface
 {
-
+    // В таблице используются поля id, username, password[в виде хэша], email, authKey[по факту не используется], accessToken[по факту не используется]
     public static function tableName() {
         return 'admins';
     }

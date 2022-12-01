@@ -29,6 +29,9 @@ class Appeal extends ActiveRecord
 
     public function getAppeal($id){
         $appeal = Appeal::find()->where('id=:id', [':id' => $id])->one();
+        if($appeal == NULL){
+            throw new \Exception('Appeal not found');
+        }
         $path = Yii::getAlias(Yii::$app->getModule('feedback')->params['uploadedFilesPath'] . $id . '/');
 
         if(file_exists($path)){
